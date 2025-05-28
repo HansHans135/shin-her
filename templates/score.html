@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歷年成績</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js"
+        data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+
+<body class="bg-amber-50 text-amber-900 min-h-screen">
+    <div class="flex">
+        <!-- 側邊欄 -->
+        <div class="hidden lg:flex lg:w-64 bg-amber-100 min-h-screen flex-col border-r border-amber-200">
+
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="/curriculum"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📅</span>課表
+                </a>
+                <a href="/attend"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📊</span>缺曠統計
+                </a>
+                <a href="/"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">🏆</span>獎懲紀錄
+                </a>
+                <a href="/score"
+                    class="flex items-center px-4 py-3 bg-amber-600 text-white rounded-lg">
+                    <span class="text-2xl mr-3">📈</span>歷年成績
+                </a>
+                <a href="/all_score"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📝</span>各式成績
+                </a>
+                <a href="/logout"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">⏏️</span>登出
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主要內容 -->
+        <div class="flex-1 p-4 lg:p-8 pb-20 lg:pb-8 overflow-x-hidden">
+            <h1
+                class="text-2xl lg:text-5xl font-bold mb-6 text-amber-800">
+                {{ data['學生資訊'] }}</h1>
+
+            <!-- 年級選擇器 -->
+            <div class="mb-6 lg:mb-8">
+                <select id="yearSelect"
+                    class="w-full lg:w-auto bg-white border border-amber-300 text-amber-900 px-4 py-3 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    <option value="">選擇年級</option>
+                    <option value="1">一年級</option>
+                    <option value="2">二年級</option>
+                    <option value="3">三年級</option>
+                    <option value="4">四年級</option>
+                </select>
+            </div>
+
+            <!-- 科目成績表格 -->
+            <div class="bg-white border border-amber-200 rounded-2xl p-3 lg:p-6 mb-6 lg:mb-8 shadow-sm">
+                <h2 class="text-xl lg:text-2xl font-bold mb-4 text-amber-800">科目成績</h2>
+                <div class="overflow-x-auto -mx-3 lg:mx-0">
+                    <div class="min-w-[800px] px-3 lg:px-0">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-amber-600">
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-left font-semibold text-white text-sm lg:text-base">
+                                        科目</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        屬性</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        上學期學分</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        上學期成績</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        下學期學分</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        下學期成績</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        學年成績</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subject in data['科目成績'] %}
+                                <tr class="hover:bg-amber-50 transition-colors">
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 font-medium text-sm lg:text-base">{{ subject['科目'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center text-amber-600 text-sm lg:text-base">
+                                        {{ subject['上學期']['屬性'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center text-sm lg:text-base">
+                                        {{ subject['上學期']['學分'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center score font-semibold text-sm lg:text-base">
+                                        {{ subject['上學期']['成績'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center text-sm lg:text-base">
+                                        {{ subject['下學期']['學分'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center score font-semibold text-sm lg:text-base">
+                                        {{ subject['下學期']['成績'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center score font-bold text-sm lg:text-lg">
+                                        {{ subject['學年成績'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 總成績 -->
+            <div class="bg-white border border-amber-200 rounded-2xl p-3 lg:p-6 mb-6 lg:mb-8 shadow-sm">
+                <h2 class="text-xl lg:text-2xl font-bold mb-4 text-amber-800">總成績統計</h2>
+                <div class="overflow-x-auto -mx-3 lg:mx-0">
+                    <div class="min-w-[500px] px-3 lg:px-0">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-green-600">
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-left font-semibold text-white text-sm lg:text-base">
+                                        項目</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        上學期</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        下學期</th>
+                                    <th
+                                        class="border border-amber-300 px-2 lg:px-4 py-3 text-center font-semibold text-white text-sm lg:text-base">
+                                        學年</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key, value in data['總成績'].items() %}
+                                <tr class="hover:bg-amber-50 transition-colors">
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 font-medium text-sm lg:text-base">{{ key }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center score font-semibold text-sm lg:text-base">
+                                        {{ value['上學期'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center score font-semibold text-sm lg:text-base">
+                                        {{ value['下學期'] }}</td>
+                                    <td class="border border-amber-300 px-2 lg:px-4 py-3 text-center score font-bold text-sm lg:text-lg">
+                                        {{ value['學年'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日常表現 -->
+            <div class="space-y-6">
+                <h2 class="text-xl lg:text-2xl font-bold text-amber-800">日常表現</h2>
+
+                <!-- 上學期 -->
+                <div
+                    class="bg-purple-100 border border-purple-300 rounded-2xl p-4 lg:p-6">
+                    <h3 class="text-lg lg:text-xl font-bold mb-4 text-purple-700">上學期</h3>
+                    <div class="space-y-4">
+                        <div class="bg-white border border-purple-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-purple-700 mb-2 text-sm lg:text-base">日常生活表現</h4>
+                            <p class="text-amber-700 mb-2 text-sm lg:text-base">{{ data['日常表現']['上學期']['日常生活表現']['描述']|replace('<br/>', '<br>')  |safe}}</p>
+                            <p class="text-purple-700 font-medium text-sm lg:text-base">評量：{{ data['日常表現']['上學期']['日常生活表現']['評量']|replace('<br/>', '<br>') |safe}}</p>
+                        </div>
+                        <div class="bg-white border border-purple-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-purple-700 mb-2 text-sm lg:text-base">服務學習</h4>
+                            <p class="text-amber-700 text-sm lg:text-base">{{ data['日常表現']['上學期']['服務學習']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                        <div class="bg-white border border-purple-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-purple-700 mb-2 text-sm lg:text-base">校內外特殊表現</h4>
+                            <p class="text-amber-700 text-sm lg:text-base">{{ data['日常表現']['上學期']['校內外特殊表現']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                        <div class="bg-white border border-purple-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-purple-700 mb-2 text-sm lg:text-base">具體建議及評語</h4>
+                            <p class="text-amber-700 text-sm lg:text-base">{{ data['日常表現']['上學期']['具體建議及評語']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 下學期 -->
+                <div
+                    class="bg-blue-100 border border-blue-300 rounded-2xl p-4 lg:p-6">
+                    <h3 class="text-lg lg:text-xl font-bold mb-4 text-blue-700">下學期</h3>
+                    <div class="space-y-4">
+                        <div class="bg-white border border-blue-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-blue-700 mb-2 text-sm lg:text-base">日常生活表現</h4>
+                            <p class="text-amber-700 mb-2 text-sm lg:text-base">{{ data['日常表現']['下學期']['日常生活表現']['描述']|replace('<br/>', '<br>')  |safe}}</p>
+                            <p class="text-blue-700 font-medium text-sm lg:text-base">評量：{{ data['日常表現']['下學期']['日常生活表現']['評量']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                        <div class="bg-white border border-blue-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-blue-700 mb-2 text-sm lg:text-base">服務學習</h4>
+                            <p class="text-amber-700 text-sm lg:text-base">{{ data['日常表現']['下學期']['服務學習']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                        <div class="bg-white border border-blue-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-blue-700 mb-2 text-sm lg:text-base">校內外特殊表現</h4>
+                            <p class="text-amber-700 text-sm lg:text-base">{{ data['日常表現']['下學期']['校內外特殊表現']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                        <div class="bg-white border border-blue-200 rounded-xl p-3 lg:p-4">
+                            <h4 class="font-semibold text-blue-700 mb-2 text-sm lg:text-base">具體建議及評語</h4>
+                            <p class="text-amber-700 text-sm lg:text-base">{{ data['日常表現']['下學期']['具體建議及評語']|replace('<br/>', '<br>')  |safe}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移動端底部導航 -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-amber-100 border-t border-amber-200 z-10">
+        <div class="flex justify-around py-2">
+            <a href="/curriculum" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📅</span>
+                <span class="text-xs mt-1">課表</span>
+            </a>
+            <a href="/attend" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📊</span>
+                <span class="text-xs mt-1">缺曠統計</span>
+            </a>
+            <a href="/" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">🏆</span>
+                <span class="text-xs mt-1">獎懲紀錄</span>
+            </a>
+            <a href="/score" class="flex flex-col items-center py-2 px-4 text-amber-800">
+                <span class="text-xl">📈</span>
+                <span class="text-xs mt-1">歷年成績</span>
+            </a>
+            <a href="/all_score" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📝</span>
+                <span class="text-xs mt-1">各式成績</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 標記低分
+            const scores = document.querySelectorAll('.score');
+            scores.forEach(score => {
+                const value = parseFloat(score.textContent);
+                if (!isNaN(value) && value < 60) {
+                    score.classList.add('text-red-400', 'font-bold');
+                } else if (!isNaN(value) && value >= 80) {
+                    score.classList.add('text-green-400');
+                }
+            });
+
+            // 處理學年選擇
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.addEventListener('change', function () {
+                const selectedYear = this.value;
+                if (selectedYear) {
+                    window.location.href = `?year=${selectedYear}`;
+                }
+            });
+
+            // 設置選單默認值
+            const urlParams = new URLSearchParams(window.location.search);
+            const yearParam = urlParams.get('year');
+            if (yearParam) {
+                yearSelect.value = yearParam;
+            }
+        });
+    </script>
+</body>
+
+</html>

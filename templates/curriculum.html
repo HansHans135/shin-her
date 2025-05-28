@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+<body class="bg-amber-50 text-amber-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <h1 class="text-4xl md:text-6xl font-bold mb-8 text-center text-amber-800">課表</h1>
+        
+        <!-- 週選擇器 -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 bg-white border border-amber-200 rounded-2xl p-6 shadow-sm">
+            <button class="week-nav-btn bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105" onclick="changeWeek(-1)">
+                ← 上週
+            </button>
+            <span class="week-info text-lg font-semibold text-amber-700" id="weekInfo">載入中...</span>
+            <button class="week-nav-btn bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105" onclick="changeWeek(1)">
+                下週 →
+            </button>
+        </div>
+
+        <!-- 缺曠狀態圖例 -->
+        <div class="bg-white border border-amber-200 rounded-2xl p-6 mb-8 shadow-sm">
+            <h3 class="text-lg font-semibold mb-4 text-amber-700">缺曠狀態：</h3>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-red-500 rounded-md"></div>
+                    <span class="text-sm text-amber-700">曠課</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-orange-500 rounded-md"></div>
+                    <span class="text-sm text-amber-700">事假</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-green-500 rounded-md"></div>
+                    <span class="text-sm text-amber-700">公假</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-purple-500 rounded-md"></div>
+                    <span class="text-sm text-amber-700">遲到</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-blue-500 rounded-md"></div>
+                    <span class="text-sm text-amber-700">病假</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 課表 -->
+        <div class="bg-white border border-amber-200 rounded-2xl p-6 shadow-sm overflow-x-auto">
+            <table id="curriculumTable" class="w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th class="bg-amber-600 text-white p-4 rounded-tl-xl border border-amber-300 text-center font-semibold">節次</th>
+                        <th class="bg-amber-600 text-white p-4 border border-amber-300 text-center font-semibold">一</th>
+                        <th class="bg-amber-600 text-white p-4 border border-amber-300 text-center font-semibold">二</th>
+                        <th class="bg-amber-600 text-white p-4 border border-amber-300 text-center font-semibold">三</th>
+                        <th class="bg-amber-600 text-white p-4 border border-amber-300 text-center font-semibold">四</th>
+                        <th class="bg-amber-600 text-white p-4 rounded-tr-xl border border-amber-300 text-center font-semibold">五</th>
+                    </tr>
+                </thead>
+                <tbody id="curriculumBody">
+                    <!-- 課表內容將由 JavaScript 動態生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+        .absence-曠 { background-color: #ef4444 !important; }
+        .absence-事 { background-color: #f97316 !important; }
+        .absence-公 { background-color: #22c55e !important; }
+        .absence-遲 { background-color: #a855f7 !important; }
+        .absence-病 { background-color: #3b82f6 !important; }
+    </style>
+
+    <script>
+        let currentWeekOffset = 0;
+        let absenceData = [];
+
+        async function loadCurriculum() {
+            try {
+                const response = await fetch('/api/curriculum');
+                const data = await response.json();
+                await loadAbsenceData();
+                renderCurriculum(data);
+            } catch (error) {
+                console.error('載入課表失敗:', error);
+                // 使用範例資料進行測試
+                renderCurriculum({});
+            }
+        }
+
+        async function loadAbsenceData() {
+            try {
+                const response = await fetch('/api/attendance');
+                absenceData = await response.json();
+                console.log('載入的缺曠資料:', absenceData);
+            } catch (error) {
+                console.error('載入缺曠資料失敗:', error);
+                absenceData = [];
+            }
+        }
+
+        function getCurrentWeekRange() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0: 週日, 1: 週一, ..., 6: 週六
+            const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // 計算到週一的偏移
+            
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + mondayOffset + (currentWeekOffset * 7));
+            monday.setHours(0, 0, 0, 0); // 設定為當天開始
+            
+            const friday = new Date(monday);
+            friday.setDate(monday.getDate() + 4);
+            friday.setHours(23, 59, 59, 999); // 設定為當天結束
+            
+            return { monday, friday };
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}/${month}/${day}`;
+        }
+
+        function updateWeekInfo() {
+            const { monday, friday } = getCurrentWeekRange();
+            const weekInfo = document.getElementById('weekInfo');
+            weekInfo.textContent = `${formatDate(monday)} - ${formatDate(friday)}`;
+        }
+
+        function changeWeek(offset) {
+            currentWeekOffset += offset;
+            updateWeekInfo();
+            renderCurrentWeekAbsence();
+        }
+
+        function getWeekdayFromChinese(chineseDay) {
+            const dayMap = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5 };
+            return dayMap[chineseDay] || 0;
+        }
+
+        // 將數字節次轉換為中文
+        function convertPeriodToChinese(period) {
+            const periodMap = { '1': '一', '2': '二', '3': '三', '4': '四', '5': '五', '6': '六', '7': '七' };
+            return periodMap[period] || period;
+        }
+
+        function renderCurriculum(data) {
+            const periods = ['一', '二', '三', '四', '五', '六', '七'];
+            const weekdays = ['一', '二', '三', '四', '五'];
+            const tbody = document.getElementById('curriculumBody');
+            
+            // 建立課表矩陣
+            const schedule = {};
+            periods.forEach(period => {
+                schedule[period] = {};
+                weekdays.forEach(weekday => {
+                    schedule[period][weekday] = '';
+                });
+            });
+
+            // 填入課程資料
+            if (data && Object.keys(data).length > 0) {
+                Object.entries(data).forEach(([subject, info]) => {
+                    if (info.schedule) {
+                        info.schedule.forEach(slot => {
+                            schedule[slot.period][slot.weekday] = subject;
+                        });
+                    }
+                });
+            }
+
+            // 生成表格內容
+            tbody.innerHTML = '';
+            periods.forEach((period, index) => {
+                const row = document.createElement('tr');
+                
+                // 節次標題
+                const periodCell = document.createElement('td');
+                periodCell.className = 'bg-amber-600 text-white p-4 border border-amber-300 text-center font-semibold';
+                periodCell.textContent = period;
+                row.appendChild(periodCell);
+
+                // 各日課程
+                weekdays.forEach(weekday => {
+                    const cell = document.createElement('td');
+                    const subject = schedule[period][weekday];
+                    
+                    if (subject) {
+                        cell.className = 'bg-amber-100 text-amber-900 p-4 border border-amber-300 text-center text-sm min-h-[60px] subject-cell';
+                        cell.textContent = subject;
+                    } else {
+                        cell.className = 'bg-amber-50 p-4 border border-amber-300 text-center min-h-[60px] empty-cell';
+                        cell.textContent = '';
+                    }
+                    
+                    // 設置資料屬性以便後續套用缺曠狀態
+                    cell.setAttribute('data-period', period);
+                    cell.setAttribute('data-weekday', weekday);
+                    
+                    row.appendChild(cell);
+                });
+
+                tbody.appendChild(row);
+            });
+
+            updateWeekInfo();
+            renderCurrentWeekAbsence();
+        }
+
+        function renderCurrentWeekAbsence() {
+            const { monday, friday } = getCurrentWeekRange();
+            console.log('當前週範圍:', formatDate(monday), '-', formatDate(friday));
+            
+            // 清除所有缺曠樣式
+            document.querySelectorAll('.subject-cell, .empty-cell').forEach(cell => {
+                cell.className = cell.className.replace(/\s*absence-\S+/g, '');
+            });
+            
+            if (absenceData.length === 0) {
+                console.log('沒有缺曠資料');
+                return;
+            }
+            
+            // 篩選當週的缺曠資料
+            const currentWeekAbsences = absenceData.filter(absence => {
+                // 解析日期 "2024/12/17" 格式
+                const [year, month, day] = absence.日期.split('/').map(Number);
+                const absenceDate = new Date(year, month - 1, day); // month 需要減1因為JavaScript月份從0開始
+                
+                const isInRange = absenceDate >= monday && absenceDate <= friday;
+                if (isInRange) {
+                    console.log('找到當週缺曠:', absence);
+                }
+                return isInRange;
+            });
+            
+            console.log(`當週缺曠筆數: ${currentWeekAbsences.length}`);
+            
+            // 套用缺曠狀態
+            currentWeekAbsences.forEach(absence => {
+                const chinesePeriod = convertPeriodToChinese(absence.節次);
+                const cell = document.querySelector(
+                    `[data-period="${chinesePeriod}"][data-weekday="${absence.星期}"]`
+                );
+                
+                if (cell) {
+                    console.log(`套用缺曠狀態: ${absence.星期} 第${chinesePeriod}節 - ${absence.狀態}`);
+                    cell.classList.add(`absence-${absence.狀態}`);
+                } else {
+                    console.log(`找不到對應的格子: ${absence.星期} 第${chinesePeriod}節`);
+                }
+            });
+        }
+
+        // 頁面載入時執行
+        document.addEventListener('DOMContentLoaded', loadCurriculum);
+    </script>
+</body>
+</html>

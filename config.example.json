@@ -1,0 +1,16 @@
+{
+    "api": {
+        "capmonster_key": "",
+        "capmonster_url": "https://api.capmonster.cloud"
+    },
+    "school": {
+        "base_url": "https://eschool.ykvs.ntpc.edu.tw/online/",
+        "weeks_per_semester": 20
+    },
+    "app": {
+        "secret_key": "ABCDEFG",
+        "host": "0.0.0.0",
+        "port": 25746,
+        "debug": false
+    }
+}

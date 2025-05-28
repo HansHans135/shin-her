@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - 更好的欣河系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+<body class="min-h-screen bg-amber-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-amber-200 rounded-3xl p-8 w-full max-w-md shadow-lg">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-amber-800 mb-2">
+                更好的欣河系統
+            </h1>
+            <p class="text-amber-600 text-sm">歡迎回來，請登入您的帳號</p>
+        </div>
+        
+        <form action="/login" method="POST" class="space-y-6">
+            <div class="space-y-2">
+                <label for="username" class="block text-sm font-medium text-amber-700">帳號 (學號)</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    class="w-full px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+                    placeholder="請輸入學號"
+                >
+            </div>
+            
+            <div class="space-y-2">
+                <label for="password" class="block text-sm font-medium text-amber-700">密碼 (身分證字號)</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="w-full px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+                    placeholder="請輸入密碼"
+                >
+            </div>
+            
+            <button 
+                type="submit" 
+                class="w-full bg-amber-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02]"
+            >
+                登入系統
+            </button>
+        </form>
+        
+        <div class="mt-6 p-4 bg-amber-100 border border-amber-300 rounded-xl">
+            <p class="text-sm text-amber-700 text-center">
+                <span class="font-medium">提示：</span>請使用學校提供的帳號密碼登入。驗證碼系統會自己處理。
+            </p>
+        </div>
+    </div>
+</body>
+</html>

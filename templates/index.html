@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>獎懲紀錄</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+<body class="bg-amber-50 text-amber-900 min-h-screen">
+    <div class="flex">
+        <!-- 側邊欄 -->
+        <div class="hidden lg:flex lg:w-64 bg-amber-100 min-h-screen flex-col border-r border-amber-200">
+
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="/curriculum" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📅</span>課表
+                </a>
+                <a href="/attend" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📊</span>缺曠統計
+                </a>
+                <a href="/" class="flex items-center px-4 py-3 bg-amber-600 text-white rounded-lg">
+                    <span class="text-2xl mr-3">🏆</span>獎懲紀錄
+                </a>
+                <a href="/score" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📈</span>歷年成績
+                </a>
+                <a href="/all_score" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📝</span>各式成績
+                </a>
+                <a href="/logout" class="flex items-center px-4 py-3 text-amber-700 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">⏏️</span>登出
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主要內容 -->
+        <div class="flex-1 p-6 lg:p-8 pb-20 lg:pb-8">
+            <h1 class="text-4xl lg:text-6xl font-bold mb-8 text-amber-800">獎懲紀錄</h1>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
+                <!-- 獎勵記錄 -->
+                {% for i in data[0] %}
+                <div class="bg-green-100 border border-green-300 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold text-white">{{i["action"][:2]}}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-green-700 mb-2">{{i["reason"]}}</h3>
+                            <div class="text-sm text-amber-600">
+                                <div>{{i["date_occurred"]}}</div>
+                                <div class="text-green-600 font-medium">{{i["action"]}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- 懲罰記錄 -->
+                {% for i in data[1] %}
+                <div class="bg-red-100 border border-red-300 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold text-white">{{i["action"][:2]}}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-red-700 mb-2">{{i["reason"]}}</h3>
+                            <div class="text-sm text-amber-600">
+                                <div>{{i["date_occurred"]}}</div>
+                                <div class="text-red-600 font-medium">{{i["action"]}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 移動端底部導航 -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-amber-100 border-t border-amber-200">
+        <div class="flex justify-around py-2">
+            <a href="/curriculum" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📅</span>
+                <span class="text-xs mt-1">課表</span>
+            </a>
+            <a href="/attend" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📊</span>
+                <span class="text-xs mt-1">缺曠統計</span>
+            </a>
+            <a href="/" class="flex flex-col items-center py-2 px-4 text-amber-800">
+                <span class="text-xl">🏆</span>
+                <span class="text-xs mt-1">獎懲紀錄</span>
+            </a>
+            <a href="/score" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📈</span>
+                <span class="text-xs mt-1">歷年成績</span>
+            </a>
+            <a href="/all_score" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📝</span>
+                <span class="text-xs mt-1">各式成績</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

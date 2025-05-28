@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>各式成績</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js"
+        data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+
+<body class="bg-amber-50 text-amber-900 min-h-screen">
+    <div class="flex">
+        <!-- 側邊欄 -->
+        <div class="hidden lg:flex lg:w-64 bg-amber-100 min-h-screen flex-col border-r border-amber-200">
+            <!--<div class="p-6">
+                <h2 class="text-xl font-bold text-amber-800">導航選單</h2>
+            </div>-->
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="/curriculum"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📅</span>課表
+                </a>
+                <a href="/attend"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📊</span>缺曠統計
+                </a>
+                <a href="/"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">🏆</span>獎懲紀錄
+                </a>
+                <a href="/score"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📈</span>歷年成績
+                </a>
+                <a href="/all_score"
+                    class="flex items-center px-4 py-3 bg-amber-600 text-white rounded-lg">
+                    <span class="text-2xl mr-3">📝</span>各式成績
+                </a>
+                <a href="/logout"
+                    class="flex items-center px-4 py-3 text-amber-700 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">⏏️</span>登出
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主要內容 -->
+        <div class="flex-1 p-6 lg:p-8 pb-20 lg:pb-8">
+            <h1 class="text-3xl lg:text-5xl font-bold mb-6 text-amber-800">各式成績</h1>
+
+            <h2 class="text-2xl font-bold mb-6 text-amber-700">{{data.exam_info}}</h2>
+
+            <!-- 年級選擇器 -->
+            <div class="mb-8">
+                <select id="yearSelect"
+                    class="bg-white border border-amber-300 text-amber-900 px-4 py-3 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    {% for i in menu%}
+                    <option value="{{i['name']}}">{{i['name']}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- 成績表格 -->
+            <div class="bg-white border border-amber-200 rounded-2xl p-6 mb-8 overflow-x-auto shadow-sm">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-amber-600">
+                            <th
+                                class="border border-amber-300 px-4 py-3 text-left font-semibold text-white">
+                                科目</th>
+                            <th
+                                class="border border-amber-300 px-4 py-3 text-center font-semibold text-white">
+                                個人分數</th>
+                            <th
+                                class="border border-amber-300 px-4 py-3 text-center font-semibold text-white">
+                                班級平均</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in data.subjects %}
+                        <tr class="hover:bg-amber-50 transition-colors">
+                            <td class="border border-amber-300 px-4 py-3 font-medium">{{ subject.subject }}
+                            </td>
+                            <td class="border border-amber-300 px-4 py-3 text-center score font-semibold">
+                                {{ subject.personal_score }}</td>
+                            <td class="border border-amber-300 px-4 py-3 text-center score">
+                                {{ subject.class_average }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 成績總結 -->
+            <div class="bg-amber-100 border border-amber-300 rounded-2xl p-6">
+                <h3 class="text-2xl font-bold mb-4 text-amber-800">成績總結</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white border border-amber-200 rounded-xl p-4">
+                        <div class="text-sm text-amber-600">總分</div>
+                        <div class="text-2xl font-bold score">{{ data.summary.total_score }}</div>
+                    </div>
+                    <div class="bg-white border border-amber-200 rounded-xl p-4">
+                        <div class="text-sm text-amber-600">平均</div>
+                        <div class="text-2xl font-bold score">{{ data.summary.average_score }}</div>
+                    </div>
+                    <div class="bg-white border border-amber-200 rounded-xl p-4">
+                        <div class="text-sm text-amber-600">班級排名</div>
+                        <div class="text-2xl font-bold text-orange-600">{{ data.summary.class_rank }}</div>
+                    </div>
+                    <div class="bg-white border border-amber-200 rounded-xl p-4">
+                        <div class="text-sm text-amber-600">科系排名</div>
+                        <div class="text-2xl font-bold text-orange-600">{{ data.summary.department_rank }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移動端底部導航 -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-amber-100 border-t border-amber-200">
+        <div class="flex justify-around py-2">
+            <a href="/curriculum" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📅</span>
+                <span class="text-xs mt-1">課表</span>
+            </a>
+            <a href="/attend" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📊</span>
+                <span class="text-xs mt-1">缺曠統計</span>
+            </a>
+            <a href="/" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">🏆</span>
+                <span class="text-xs mt-1">獎懲紀錄</span>
+            </a>
+            <a href="/score" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📈</span>
+                <span class="text-xs mt-1">歷年成績</span>
+            </a>
+            <a href="/all_score" class="flex flex-col items-center py-2 px-4 text-amber-800">
+                <span class="text-xl">📝</span>
+                <span class="text-xs mt-1">各式成績</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 標記低分
+            const scores = document.querySelectorAll('.score');
+            scores.forEach(score => {
+                const value = parseFloat(score.textContent);
+                if (!isNaN(value) && value < 60) {
+                    score.classList.add('text-red-400', 'font-bold');
+                }
+            });
+
+            // 處理學年選擇
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.addEventListener('change', function () {
+                const selectedYear = this.value;
+                if (selectedYear) {
+                    window.location.href = `?name=${selectedYear}`;
+                }
+            });
+
+            // 設置選單默認值
+            const urlParams = new URLSearchParams(window.location.search);
+            const yearParam = urlParams.get('name');
+            if (yearParam) {
+                yearSelect.value = yearParam;
+            }
+        });
+    </script>
+</body>
+
+</html>
+

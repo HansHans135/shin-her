@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>缺曠統計</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+<body class="bg-amber-50 text-amber-900 min-h-screen">
+    <div class="flex">
+        <!-- 側邊欄 -->
+        <div class="hidden lg:flex lg:w-64 bg-amber-100 min-h-screen flex-col border-r border-amber-200">
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="/curriculum" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📅</span>課表
+                </a>
+                <a href="/attend" class="flex items-center px-4 py-3 bg-amber-600 text-white rounded-lg">
+                    <span class="text-2xl mr-3">📊</span>缺曠統計
+                </a>
+                <a href="/" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">🏆</span>獎懲紀錄
+                </a>
+                <a href="/score" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📈</span>歷年成績
+                </a>
+                <a href="/all_score" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">📝</span>各式成績
+                </a>
+                <a href="/logout" class="flex items-center px-4 py-3 text-amber-700 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">⏏️</span>登出
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主要內容 -->
+        <div class="flex-1 p-6 lg:p-8">
+            <h1 class="text-4xl lg:text-5xl font-bold mb-8 text-amber-800">缺曠統計</h1>
+            
+            <!-- 統計卡片 -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+                <div class="bg-red-100 border border-red-300 rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-red-700 mb-2">曠課</h3>
+                    <p class="text-3xl font-bold text-red-800">{{attendance_data["全部合計"]["曠課"]}}</p>
+                </div>
+                <div class="bg-orange-100 border border-orange-300 rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-orange-700 mb-2">事假</h3>
+                    <p class="text-3xl font-bold text-orange-800">{{attendance_data["全部合計"]["事假"]}}</p>
+                </div>
+                <div class="bg-blue-100 border border-blue-300 rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-blue-700 mb-2">病假</h3>
+                    <p class="text-3xl font-bold text-blue-800">{{attendance_data["全部合計"]["病假"]}}</p>
+                </div>
+                <div class="bg-green-100 border border-green-300 rounded-2xl p-6 text-center">
+                    <h3 class="text-lg font-semibold text-green-700 mb-2">公假</h3>
+                    <p class="text-3xl font-bold text-green-800">{{attendance_data["全部合計"]["公假"]}}</p>
+                </div>
+            </div>
+
+            <!-- 學期統計表格 -->
+            <div class="bg-white border border-amber-200 rounded-2xl p-6 mb-8 overflow-x-auto shadow-sm">
+                <h2 class="text-2xl font-bold mb-4 text-amber-800">學期統計</h2>
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-amber-200">
+                            <th class="border border-amber-300 px-4 py-3 text-left font-semibold text-amber-900">項目</th>
+                            <th class="border border-amber-300 px-4 py-3 text-center font-semibold text-amber-900">上學期合計</th>
+                            <th class="border border-amber-300 px-4 py-3 text-center font-semibold text-amber-900">下學期合計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in attendance_data["上學期合計"].keys() %}
+                        <tr class="hover:bg-amber-50 transition-colors">
+                            <td class="border border-amber-300 px-4 py-3 font-medium">{{ item }}</td>
+                            <td class="border border-amber-300 px-4 py-3 text-center">{{ attendance_data["上學期合計"][item] }}</td>
+                            <td class="border border-amber-300 px-4 py-3 text-center">{{ attendance_data["下學期合計"][item] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 三分之一不到課 -->
+            <div class="bg-white border border-amber-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-2xl font-bold mb-4 text-red-700">三分之一不到課警告</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-red-100">
+                                <th class="border border-red-300 px-4 py-3 text-left font-semibold text-red-900">課程</th>
+                                <th class="border border-red-300 px-4 py-3 text-center font-semibold text-red-900">事假</th>
+                                <th class="border border-red-300 px-4 py-3 text-center font-semibold text-red-900">曠課</th>
+                                <th class="border border-red-300 px-4 py-3 text-center font-semibold text-red-900">總課數</th>
+                                <th class="border border-red-300 px-4 py-3 text-center font-semibold text-red-900">缺課百分比</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data %}
+                            <tr class="hover:bg-red-50 transition-colors">
+                                <td class="border border-red-300 px-4 py-3 font-medium">{{ item }}</td>
+                                <td class="border border-red-300 px-4 py-3 text-center text-orange-700">{{ data[item]["事假"] }}</td>
+                                <td class="border border-red-300 px-4 py-3 text-center text-red-700">{{ data[item]["曠課"] }}</td>
+                                <td class="border border-red-300 px-4 py-3 text-center">{{ data[item]["all"] }}</td>
+                                <td class="border border-red-300 px-4 py-3 text-center font-bold text-red-800">{{ data[item]["percent"] }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移動端底部導航 -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-amber-100 border-t border-amber-200">
+        <div class="flex justify-around py-2">
+            <a href="/curriculum" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📅</span>
+                <span class="text-xs mt-1">課表</span>
+            </a>
+            <a href="/attend" class="flex flex-col items-center py-2 px-4 text-amber-800">
+                <span class="text-xl">📊</span>
+                <span class="text-xs mt-1">缺曠統計</span>
+            </a>
+            <a href="/" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">🏆</span>
+                <span class="text-xs mt-1">獎懲紀錄</span>
+            </a>
+            <a href="/score" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📈</span>
+                <span class="text-xs mt-1">歷年成績</span>
+            </a>
+            <a href="/all_score" class="flex flex-col items-center py-2 px-4 text-amber-600 hover:text-amber-900">
+                <span class="text-xl">📝</span>
+                <span class="text-xs mt-1">各式成績</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
