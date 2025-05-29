@@ -4,7 +4,7 @@
 > https://ykvs.hans0805.me/
 
 # 截圖與對比
-(todo)
+https://www.threads.com/@08.hans_/post/DKJvkKZJshr
 
 # 技術架構
 > 後端
