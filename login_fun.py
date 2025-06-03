@@ -123,12 +123,10 @@ def start_login(account, password):
                 return {"status": "error", "message": "未知的錯誤"}
         
         if session.cookies.items():
-            cookie_name = session.cookies.items()[0][0]
-            cookie_value = session.cookies.items()[0][1]
             return {
                 "status": "success", 
                 "message": "登入成功",
-                "cookies": f"{cookie_name}={cookie_value}"
+                "cookies": dict(session.cookies.items())
             }
         else:
             return {"status": "error", "message": "登入成功但無法獲取 cookie"}

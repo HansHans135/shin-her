@@ -1,16 +1,17 @@
 {
-    "api": {
-        "capmonster_key": "",
-        "capmonster_url": "https://api.capmonster.cloud"
+    "app": {
+      "secret_key": "請更換為隨機字串",
+      "host": "0.0.0.0",
+      "port": 5000,
+      "debug": false
     },
     "school": {
-        "base_url": "https://eschool.ykvs.ntpc.edu.tw/online/",
-        "weeks_per_semester": 20
+      "base_url": "你的學校網站網址",
+      "weeks_per_semester": 18
     },
-    "app": {
-        "secret_key": "ABCDEFG",
-        "host": "0.0.0.0",
-        "port": 25746,
-        "debug": false
+    "api": {
+      "capmonster_key": "你的API金鑰",
+      "capmonster_url": "https://api.capmonster.cloud"
     }
-}
+  }
+  
