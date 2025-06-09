@@ -16,7 +16,7 @@
             <p class="text-amber-600 text-sm">歡迎回來，請登入您的帳號</p>
         </div>
         
-        <form action="/login" method="POST" class="space-y-6">
+        <form action="/login" method="POST" class="space-y-6" id="loginForm">
             <div class="space-y-2">
                 <label for="username" class="block text-sm font-medium text-amber-700">帳號 (學號)</label>
                 <input 
@@ -37,8 +37,124 @@
                     name="password" 
                     class="w-full px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
                     placeholder="請輸入密碼"
+                    required
                 >
             </div>
+            <div class="flex items-center space-x-2 my-4">
+                <input 
+                    type="checkbox" 
+                    id="privacy-agreement" 
+                    name="privacy_agreement" 
+                    required 
+                    disabled
+                    class="w-4 h-4 text-amber-600 bg-amber-50 border-amber-300 rounded focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                <label for="privacy-agreement" class="text-sm text-amber-700">
+                    我已閱讀並同意<button type="button" onclick="showPrivacyModal()" class="text-amber-600 hover:underline font-medium">隱私權政策</button>
+                    <span class="text-amber-500 text-xs block mt-1">※ 請先閱讀隱私權政策後才能勾選同意</span>
+                </label>
+            </div>
+
+            <script>
+                let hasReadPrivacy = false;
+                
+                // 表單提交驗證
+                document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.getElementById('loginForm');
+                    const checkbox = document.getElementById('privacy-agreement');
+                    
+                    // 防止用戶直接勾選checkbox
+                    checkbox.addEventListener('click', function(e) {
+                        if (!hasReadPrivacy) {
+                            e.preventDefault();
+                            alert('請先閱讀隱私權政策後才能勾選同意');
+                        }
+                    });
+                    
+                    // 表單提交時驗證
+                    form.addEventListener('submit', function(e) {
+                        if (!checkbox.checked) {
+                            e.preventDefault();
+                            alert('請先閱讀並同意隱私權政策才能登入');
+                            return false;
+                        }
+                        
+                        if (!hasReadPrivacy) {
+                            e.preventDefault();
+                            alert('請先閱讀隱私權政策後才能登入');
+                            return false;
+                        }
+                        
+                        // 顯示載入狀態
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = '登入中...';
+                        submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+                    });
+                });
+                
+                function showPrivacyModal() {
+                    document.getElementById('privacyModal').classList.remove('hidden');
+                    document.getElementById('privacyContent').innerHTML = '載入中...';
+                    
+                    fetch('/privacy')
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const content = doc.querySelector('main') || doc.body;
+                            document.getElementById('privacyContent').innerHTML = content.innerHTML;
+                            
+                            // 啟用閱讀完成按鈕的倒數計時
+                            startReadingTimer();
+                        })
+                        .catch(error => {
+                            document.getElementById('privacyContent').innerHTML = '<p class="text-red-500">無法載入隱私權政策，請稍後再試。</p>';
+                        });
+                }
+                
+                function startReadingTimer() {
+                    const agreeButton = document.getElementById('agreeButton');
+                    const timerSpan = document.getElementById('timer');
+                    let timeLeft = 0;
+                    
+                    agreeButton.disabled = true;
+                    agreeButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    agreeButton.classList.remove('hover:bg-amber-700');
+                    
+                    const timer = setInterval(() => {
+                        timerSpan.textContent = `(${timeLeft}秒後可點擊)`;
+                        timeLeft--;
+                        
+                        if (timeLeft < 0) {
+                            clearInterval(timer);
+                            agreeButton.disabled = false;
+                            agreeButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                            agreeButton.classList.add('hover:bg-amber-700');
+                            timerSpan.textContent = '';
+                        }
+                    }, 1000);
+                }
+                
+                function closePrivacyModal() {
+                    document.getElementById('privacyModal').classList.add('hidden');
+                }
+                
+                function agreePrivacy() {
+                    hasReadPrivacy = true;
+                    document.getElementById('privacy-agreement').disabled = false;
+                    document.getElementById('privacy-agreement').checked = true;
+                    document.getElementById('privacy-agreement').classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed');
+                    
+                    // 更新提示文字
+                    const hintText = document.querySelector('label[for="privacy-agreement"] span');
+                    hintText.textContent = '✓ 已閱讀並同意隱私權政策';
+                    hintText.classList.remove('text-amber-500');
+                    hintText.classList.add('text-green-600');
+                    
+                    closePrivacyModal();
+                }
+            </script>
             
             <button 
                 type="submit" 
@@ -47,7 +163,32 @@
                 登入系統
             </button>
         </form>
-        
+
+        <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl max-w-lg w-full max-h-[80vh] flex flex-col">
+                <div class="p-4 border-b border-amber-200 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-amber-800">隱私權政策</h3>
+                    <button onclick="closePrivacyModal()" class="text-amber-500 hover:text-amber-700 text-xl">✕</button>
+                </div>
+                <div class="p-4 overflow-y-auto flex-grow" id="privacyContent">
+                    載入中...
+                </div>
+                <div class="p-4 border-t border-amber-200">
+                    <button 
+                        id="agreeButton" 
+                        onclick="agreePrivacy()" 
+                        class="w-full bg-amber-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                        disabled
+                    >
+                        我已閱讀並同意 <span id="timer" class="text-amber-200 text-sm"></span>
+                    </button>
+                    <p class="text-xs text-amber-600 mt-2 text-center">
+                        請仔細閱讀以上內容
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-6 p-4 bg-amber-100 border border-amber-300 rounded-xl">
             <p class="text-sm text-amber-700 text-center">
                 <span class="font-medium">提示：</span>請使用學校提供的帳號密碼登入。驗證碼系統會自己處理。

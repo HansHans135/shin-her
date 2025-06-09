@@ -11,19 +11,21 @@ https://www.threads.com/@08.hans_/post/DKJvkKZJshr
 - Python
 - Flask + jinja2
 - BeautifulSoup
+- selenium
 
 > 前端
 - HTML
 - Tailwind CSS
 - JavaScript
 
-# 安裝與配置
+# 安裝與配置（項目測試中，此配置可能失效）
 
 下載或 Git 此倉庫
 ```
 git clone https://github.com/HansHans135/shin-her.git
 cd shin-her
 ```
+
 
 複製 `config.example.json` 並重新命名為 `config.json`
 

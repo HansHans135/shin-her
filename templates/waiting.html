@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入中 - 更好的欣河系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+<body class="min-h-screen bg-amber-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-amber-200 rounded-3xl p-8 w-full max-w-md shadow-lg text-center">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-amber-800 mb-2">
+                更好的欣河系統
+            </h1>
+            <p class="text-amber-600 text-sm">正在為您登入系統</p>
+        </div>
+        
+        <!-- 載入動畫 -->
+        <div class="mb-6">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-600 mx-auto"></div>
+        </div>
+        
+        <!-- 狀態顯示 -->
+        <div class="space-y-4">
+            <div class="text-amber-700">
+                <div id="status-text" class="font-medium text-lg">正在準備登入...</div>
+                <div id="detail-text" class="text-sm text-amber-600 mt-2">請稍候片刻</div>
+            </div>
+            
+            <!-- 進度條 -->
+            <div class="w-full bg-amber-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-amber-600 h-2 rounded-full transition-all duration-1000" style="width: 10%"></div>
+            </div>
+        </div>
+        
+        <!-- 提示訊息 -->
+        <div class="mt-8 p-4 bg-amber-100 border border-amber-300 rounded-xl">
+            <p class="text-sm text-amber-700">
+                <span class="font-medium">登入流程：</span>系統正在自動處理驗證碼並登入，這個過程需要一些時間，請耐心等候。
+            </p>
+        </div>
+        
+        <!-- 取消按鈕 -->
+        <div class="mt-6">
+            <a href="/login" class="inline-block bg-amber-200 text-amber-800 py-2 px-6 rounded-xl font-medium hover:bg-amber-300 transition-colors">
+                取消登入
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let progress = 10;
+        let stage = 0;
+        const stages = [
+            { text: "正在準備登入...", detail: "初始化登入流程" },
+            { text: "正在載入登入頁面...", detail: "連接到學校系統" },
+            { text: "正在填寫帳號密碼...", detail: "輸入您的登入資訊" },
+            { text: "正在處理驗證碼...", detail: "自動識別驗證碼中" },
+            { text: "正在提交登入資料...", detail: "驗證您的身份" },
+            { text: "正在確認登入狀態...", detail: "即將完成" }
+        ];
+        
+        function updateProgress() {
+            if (progress < 90) {
+                progress += Math.random() * 15;
+                document.getElementById('progress-bar').style.width = progress + '%';
+                
+                if (progress > (stage + 1) * 15 && stage < stages.length - 1) {
+                    stage++;
+                    document.getElementById('status-text').textContent = stages[stage].text;
+                    document.getElementById('detail-text').textContent = stages[stage].detail;
+                }
+                
+                setTimeout(updateProgress, 1500 + Math.random() * 2000);
+            }
+        }
+        
+        // 開始進度更新
+        updateProgress();
+        
+        // 檢查登入結果
+        function checkLoginStatus() {
+            fetch('/api/login-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('status-text').textContent = '登入成功！';
+                        document.getElementById('detail-text').textContent = '正在跳轉到主頁面...';
+                        document.getElementById('progress-bar').style.width = '100%';
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 500);
+                    } else if (data.status === 'error') {
+                        document.getElementById('status-text').textContent = '登入失敗';
+                        document.getElementById('detail-text').textContent = data.message || '發生未知錯誤';
+                        document.getElementById('progress-bar').style.width = '100%';
+                        document.getElementById('progress-bar').classList.remove('bg-amber-600');
+                        document.getElementById('progress-bar').classList.add('bg-red-500');
+                        setTimeout(() => {
+                            window.location.href = '/login?error=' + encodeURIComponent(data.message || '登入失敗');
+                        }, 3000);
+                    } else {
+                        // 仍在處理中，繼續檢查
+                        setTimeout(checkLoginStatus, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('檢查登入狀態時發生錯誤:', error);
+                    setTimeout(checkLoginStatus, 3000);
+                });
+        }
+        
+        // 開始檢查登入狀態
+        setTimeout(checkLoginStatus, 2000);
+    </script>
+</body>
+</html>
