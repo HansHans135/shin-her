@@ -10,6 +10,12 @@ import json
 import os
 from datetime import datetime
 
+def load_config():
+    with open('config.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+config = load_config()
+
 def setup_driver():
     """設定 Chrome WebDriver"""
     chrome_options = Options()
@@ -135,7 +141,7 @@ def fetch_page_data(url, cookies_file, save_html=True):
             print("無法載入 cookies，請先執行登入程式")
             return None
         
-        base_url = "https://eschool.ykvs.ntpc.edu.tw/"
+        base_url = config['school']['root_url']
         print(f"正在訪問root: {base_url}")
         driver.get(base_url)
 

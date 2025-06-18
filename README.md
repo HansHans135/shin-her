@@ -33,7 +33,9 @@ cd shin-her
 |---|---|
 |capmonster_key|電腦驗證 API Key|
 |capmonster_url|電腦驗證 API 網址|
-|base_url|欣河登入首頁網址|
+|base_url|登入後之首頁網址|
+|root_url|欣河系統根目錄|
+|login_url|欣河登入頁面網址|
 |weeks_per_semester|每學期周數，用於計算缺曠|
 |secret_key|隨機亂碼|
 |port|運行端口|

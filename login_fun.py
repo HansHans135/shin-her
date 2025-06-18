@@ -168,7 +168,7 @@ def start_login(account, password):
     driver = None
     try:
         driver = setup_driver()
-        login_url = "https://eschool.ykvs.ntpc.edu.tw/auth/Online"
+        login_url = config['school']['login_url']
         
         print("正在載入登入頁面...")
         driver.get(login_url)

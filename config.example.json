@@ -6,7 +6,9 @@
       "debug": false
     },
     "school": {
-      "base_url": "你的學校網站網址",
+      "root_url":"https://eschool.ykvs.ntpc.edu.tw/",
+      "login_url": "https://eschool.ykvs.ntpc.edu.tw/auth/Online",
+      "base_url": "https://eschool.ykvs.ntpc.edu.tw/Online",
       "weeks_per_semester": 18
     },
     "api": {
