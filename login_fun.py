@@ -214,13 +214,8 @@ def start_login(account, password):
         except:
             pass
         
-        if "錯誤" in page_source:
-            if "驗證碼" in page_source:
-                return {"status": "error", "message": "驗證碼錯誤"}
-            elif "帳號或密碼" in page_source:
-                return {"status": "error", "message": "帳號或密碼錯誤"}
-            else:
-                return {"status": "error", "message": "未知的錯誤"}
+        if "auth" in page_source:
+            return {"status": "error", "message": "驗證碼錯誤"}
         
         if current_url != login_url:
             cookies = driver.get_cookies()

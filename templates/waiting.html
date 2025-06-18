@@ -16,19 +16,16 @@
             <p class="text-amber-600 text-sm">正在為您登入系統</p>
         </div>
         
-        <!-- 載入動畫 -->
         <div class="mb-6">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-600 mx-auto"></div>
         </div>
         
-        <!-- 狀態顯示 -->
         <div class="space-y-4">
             <div class="text-amber-700">
                 <div id="status-text" class="font-medium text-lg">正在準備登入...</div>
                 <div id="detail-text" class="text-sm text-amber-600 mt-2">請稍候片刻</div>
             </div>
             
-            <!-- 進度條 -->
             <div class="w-full bg-amber-200 rounded-full h-2">
                 <div id="progress-bar" class="bg-amber-600 h-2 rounded-full transition-all duration-1000" style="width: 10%"></div>
             </div>
@@ -41,7 +38,6 @@
             </p>
         </div>
         
-        <!-- 取消按鈕 -->
         <div class="mt-6">
             <a href="/login" class="inline-block bg-amber-200 text-amber-800 py-2 px-6 rounded-xl font-medium hover:bg-amber-300 transition-colors">
                 取消登入
@@ -76,10 +72,8 @@
             }
         }
         
-        // 開始進度更新
         updateProgress();
         
-        // 檢查登入結果
         function checkLoginStatus() {
             fetch('/api/login-status')
                 .then(response => response.json())
@@ -101,7 +95,6 @@
                             window.location.href = '/login?error=' + encodeURIComponent(data.message || '登入失敗');
                         }, 3000);
                     } else {
-                        // 仍在處理中，繼續檢查
                         setTimeout(checkLoginStatus, 2000);
                     }
                 })
@@ -111,7 +104,6 @@
                 });
         }
         
-        // 開始檢查登入狀態
         setTimeout(checkLoginStatus, 2000);
     </script>
 </body>

@@ -12,7 +12,6 @@ import time
 
 app = Flask(__name__)
 
-# 儲存登入狀態的字典
 login_status = {}
 
 def load_config():
@@ -52,7 +51,7 @@ def get_headers():
 
 @app.errorhandler(500)
 async def error_500(error):
-    return "發生了點錯誤，請稍後再試，或重新整理頁面。", 500
+    return "發生了點錯誤，請稍後再試，或重新整理頁面。<br><a href='/logout'>登出</a>", 500
 
 def async_login(username, password, session_id):
     """異步執行登入流程"""
@@ -92,13 +91,11 @@ def login():
         if not privacy_agreement:
             return "<script>window.alert(\"請先同意隱私權政策\");window.location.href = '/login';</script>"
         
-        # 生成唯一的 session ID
         import uuid
         session_id = str(uuid.uuid4())
         session['login_session_id'] = session_id
         session['username'] = username
         
-        # 在背景執行登入
         thread = threading.Thread(target=async_login, args=(username, password, session_id))
         thread.daemon = True
         thread.start()
@@ -122,11 +119,9 @@ def api_login_status():
     status_data = login_status[session_id]
     
     if status_data["status"] == "success":
-        # 設定 session 資料
         session["account"] = status_data["account"]
         session["student_number"] = status_data["student_number"]
         
-        # 清理登入狀態
         del login_status[session_id]
         del session['login_session_id']
         del session['username']
