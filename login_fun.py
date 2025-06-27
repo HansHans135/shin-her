@@ -3,6 +3,7 @@ import os
 import time
 import base64
 import json
+import random
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -10,6 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 def load_config():
@@ -73,47 +75,9 @@ def setup_driver():
     chrome_options = Options()
     
     chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument("--disable-web-security")
-    chrome_options.add_argument("--allow-running-insecure-content")
-    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
     chrome_options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
     chrome_options.add_argument("--window-size=1920,1080")
     
-    # 更強力的 SSL 和安全性忽略選項
-    chrome_options.add_argument('--ignore-certificate-errors')
-    chrome_options.add_argument('--ignore-ssl-errors')
-    chrome_options.add_argument('--ignore-certificate-errors-spki-list')
-    chrome_options.add_argument('--ignore-urlfetcher-cert-requests')
-    chrome_options.add_argument('--disable-extensions-http-throttling')
-    chrome_options.add_argument('--allow-running-insecure-content')
-    chrome_options.add_argument('--disable-web-security')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--remote-debugging-port=9222')
-    chrome_options.add_argument('--disable-features=VizDisplayCompositor')
-    chrome_options.add_argument('--ignore-ssl-errors-list')
-    chrome_options.add_argument('--disable-background-timer-throttling')
-    chrome_options.add_argument('--disable-backgrounding-occluded-windows')
-    chrome_options.add_argument('--disable-renderer-backgrounding')
-    chrome_options.add_argument('--disable-background-networking')
-    chrome_options.add_argument('--disable-ipc-flooding-protection')
-    chrome_options.add_argument('--accept-lang=zh-TW,zh,en')
-    chrome_options.add_argument('--lang=zh-TW')
-    chrome_options.add_argument('--disable-logging')
-    chrome_options.add_argument('--disable-login-animations')
-    chrome_options.add_argument('--disable-default-apps')
-    chrome_options.add_argument('--no-default-browser-check')
-    chrome_options.add_argument('--no-first-run')
-    chrome_options.add_argument('--ignore-ssl-errors-list')
-    chrome_options.add_argument('--ignore-ssl-errors')
-    chrome_options.add_argument('--allow-running-insecure-content')
-    chrome_options.add_argument('--disable-web-security')
-    chrome_options.add_argument('--trust-server-cert')
-    
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option('useAutomationExtension', False)
     
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -164,6 +128,38 @@ def download_captcha_from_selenium(driver, captcha_filename):
         print(f"提取驗證碼時發生錯誤: {e}")
         return False
 
+def human_type(element, text, min_delay=0.05, max_delay=0.2):
+    """模擬人類打字速度"""
+    element.clear()
+    for char in text:
+        element.send_keys(char)
+        delay = random.uniform(min_delay, max_delay)
+        time.sleep(delay)
+    
+    time.sleep(random.uniform(0.3, 0.8))
+
+def human_click(driver, element):
+    """模擬人類點擊行為，包含滑鼠軌跡"""
+    actions = ActionChains(driver)
+    
+    element_location = element.location
+    element_size = element.size
+    
+    center_x = element_location['x'] + element_size['width'] // 2
+    center_y = element_location['y'] + element_size['height'] // 2
+    
+    offset_x = random.randint(-10, 10)
+    offset_y = random.randint(-5, 5)
+    
+    actions.move_to_element_with_offset(element, offset_x, offset_y)
+    
+    time.sleep(random.uniform(0.2, 0.5))
+    
+    actions.click()
+    actions.perform()
+    
+    time.sleep(random.uniform(0.1, 0.3))
+
 def start_login(account, password):
     driver = None
     try:
@@ -178,13 +174,11 @@ def start_login(account, password):
         )
         
         username_field = driver.find_element(By.ID, "LoginName")
-        username_field.clear()
-        username_field.send_keys(account)
+        human_type(username_field, account)
         print(f"帳號已填入: {account}")
         
         password_field = driver.find_element(By.ID, "PassString")
-        password_field.clear()
-        password_field.send_keys(password)
+        human_type(password_field, password)
         print("密碼已填入")
         
         captcha_image_path = f'{account}.jpg'
@@ -196,12 +190,13 @@ def start_login(account, password):
             return {"status": "error", "message": "驗證碼解析失敗"}
         
         captcha_field = driver.find_element(By.ID, "ShCaptchaGenCode")
-        captcha_field.clear()
-        captcha_field.send_keys(vcode)
+        human_type(captcha_field, vcode, min_delay=0.1, max_delay=0.3)
         print("驗證碼已填入")
         
+        time.sleep(random.uniform(0.8, 1.5))
+
         login_button = driver.find_element(By.CSS_SELECTOR, "button.btn.btn-primary.loginBtnAdjust")
-        login_button.click()
+        human_click(driver, login_button)
         print("已點擊登入按鈕")
         
         time.sleep(3)
@@ -213,8 +208,8 @@ def start_login(account, password):
             os.remove(captcha_image_path)
         except:
             pass
-        
-        if "auth" in page_source:
+        print(page_source)
+        if "您的瀏覽器不支援框架，請更新瀏覽器版本，建議您使用 Internet Explorer 10 以上版本。" not in page_source:
             return {"status": "error", "message": "登入失敗，請再試一次"}
         
         if current_url != login_url:
