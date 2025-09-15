@@ -1,6 +1,7 @@
 config.json
 .vscode/*
 .venv/*
-__pycache__/*
+__pycache__/
 .DS_Store
 data/*
+views/__pycache__/*

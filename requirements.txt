@@ -5,3 +5,4 @@ html5lib>=1.1
 flask[async]
 selenium
 webdriver_manager
+cryptography
