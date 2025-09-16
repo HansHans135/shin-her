@@ -94,6 +94,9 @@ def get_page_with_session(url):
     if not account:
         return None
     
+    if not re.match(r'^[a-zA-Z0-9_-]+$', account):
+        return None
+    
     cookie_file_path = f'data/cookie/{account}.json'
     if not os.path.exists(cookie_file_path):
         return None

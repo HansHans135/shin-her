@@ -15,6 +15,9 @@ def get_page_with_session(url, account):
     if not account:
         return None
     
+    if not re.match(r'^[a-zA-Z0-9_-]+$', account):
+        return None
+    
     cookie_file_path = f'data/cookie/{account}.json'
     if not os.path.exists(cookie_file_path):
         return None
@@ -178,32 +181,6 @@ async def api_attendance():
     data = parse_absence_records(result['html'], filter_types=[])
     return jsonify({"status": "success", "data": data})
 
-@home.route('/absence')
-async def api_absence():
-    """
-    取得缺勤記錄 API
-    返回學生詳細的缺勤資料
-    """
-    api_account = load_api_key(request)
-    if not api_account:
-        return jsonify({"status": "error", "message": "未授權"}), 401
-    
-    account = load_api_token(request)
-    if not account:
-        return jsonify({"status": "error", "message": "未提供帳號"}), 401
-    if not account or not load_cookies_from_file(account):
-        return jsonify({"status": "error", "message": "未登入"}), 401
-        
-    url = f"{config['school']['base_url']}selection_student/absentation_skip_school.asp"
-    result = get_page_with_session(url, account)
-    if not result:
-        return jsonify({"status": "error", "message": "無法取得資料"}), 500
-
-    if "重新登入" in result['html']:
-        return jsonify({"status": "error", "message": "登入已過期"}), 401
-    
-    data = parse_absence_records(result['html'])
-    return jsonify({"status": "success", "data": data})
 
 @home.route('/attendance-statistics')
 async def api_attendance_statistics():
@@ -252,7 +229,9 @@ async def score():
         return jsonify({"status": "error", "message": "未登入"}), 401
         
     year_ch = {"1": "%A4%40", "2": "%A4G","3":"%A4T","4":"%A5%7C"}
-    year_num = request.values.get("year") or "1"
+    year_num = request.values.get("year","1")
+    if year_num not in year_ch:
+        return jsonify({"status": "error", "message": "年級參數錯誤"}), 400
     url = f"{config['school']['base_url']}selection_student/year_accomplishment.asp?action=selection_underside_year&year_class={year_ch[year_num]}&number={year_num}"
     
     result = get_page_with_session(url, account)
