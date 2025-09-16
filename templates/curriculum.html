@@ -83,7 +83,7 @@
 
         async function loadCurriculum() {
             try {
-                const response = await fetch('/api/curriculum');
+                const response = await fetch('/webapi/curriculum');
                 const data = await response.json();
                 await loadAbsenceData();
                 renderCurriculum(data);
@@ -96,7 +96,7 @@
 
         async function loadAbsenceData() {
             try {
-                const response = await fetch('/api/attendance');
+                const response = await fetch('/webapi/attendance');
                 absenceData = await response.json();
                 console.log('載入的缺曠資料:', absenceData);
             } catch (error) {

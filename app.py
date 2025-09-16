@@ -36,5 +36,7 @@ for filename in os.listdir(views_dir):
             app.register_blueprint(module.home)
 print("> 已註冊檔案")
 
+print(app.url_map)
+
 if __name__ == "__main__":
     app.run(host=config['app']['host'], port=config['app']['port'], debug=config['app']['debug'])

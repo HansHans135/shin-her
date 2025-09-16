@@ -1,54 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Blueprint
-import requests
-from bs4 import BeautifulSoup
-import login_fun
-import re
-import json
-from get_fun import *
 import os
-from page_fetcher import get_page_data
 import threading
-import time
+
+from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+
+import utils.login_fun as login_fun
+from utils.get_fun import * 
+from utils.page_fetcher import get_page_data
+from utils.config import *
 
 home = Blueprint('index', __name__)
 
 login_status = {}
 
-def load_config():
-    with open('config.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
-
 config = load_config()
-
-def load_cookies_from_file(account):
-    try:
-        cookie_file_path = f'data/{account}.json'
-        if os.path.exists(cookie_file_path):
-            with open(cookie_file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-    except Exception as e:
-        print(f"載入 cookies 檔案時發生錯誤: {e}")
-    return None
-
-def get_headers():
-    account = session.get("account")
-    if not account:
-        return None
-    
-    cookies = load_cookies_from_file(account)
-    if not cookies:
-        return None
-    
-    headers = {
-        "accept-encoding": "gzip, deflate, br, zstd",
-        "accept-language": "zh-TW,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-        "cache-control": "no-cache",
-        "cookie": "; ".join([f"{k}={v}" for k, v in cookies.items()]),
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
-    }
-    return headers
-
-
 
 def async_login(username, password, session_id):
     """異步執行登入流程"""
@@ -97,14 +61,14 @@ def login():
         thread.daemon = True
         thread.start()
         
-        return redirect(url_for('waiting'))
+        return redirect(url_for('index.waiting'))
     
     return render_template('login.html')
 
 @home.route('/waiting')
 def waiting():
     if 'login_session_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('index.login'))
     return render_template('waiting.html')
 
 @home.route('/api/login-status')
@@ -130,7 +94,7 @@ def get_page_with_session(url):
     if not account:
         return None
     
-    cookie_file_path = f'data/{account}.json'
+    cookie_file_path = f'data/cookie/{account}.json'
     if not os.path.exists(cookie_file_path):
         return None
     
@@ -164,7 +128,7 @@ def logout():
     session.clear()
     return redirect("/login")
 
-@home.route('/api/curriculum')
+@home.route('/webapi/curriculum')
 async def api_curriculum():
     account = session.get("account")
     if not account or not load_cookies_from_file(account):
@@ -182,7 +146,7 @@ async def api_curriculum():
     d1 = parse_weekly_curriculum(result['html'])
     return d1
 
-@home.route('/api/attendance')
+@home.route('/webapi/attendance')
 async def api_attendance():
     account = session.get("account")
     if not account or not load_cookies_from_file(account):
