@@ -404,11 +404,48 @@ GET /api/score?year=2
 #### 錯誤回應
 - **400 Bad Request**: 年級參數錯誤
 
-### 8. 考試成績
+### 8. 考試選單
 
-**GET** `/api/all_score`
+**GET** `/api/exams`
 
-返回考試選單與指定考試的詳細成績資料。
+取得所有可用的考試選單資料。
+
+#### 請求標頭
+```
+Authorization: {api_key}
+token: {user_token}
+```
+
+#### 成功回應 (200)
+```json
+{
+    "status": "success",
+    "data": [
+        {
+            "full_url": "https://eschool.ykvs.ntpc.edu.tw/Online/selection_student/student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1312&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%A4G%A6%B8%ACq%A6%D2",
+            "name": "[113上] 113上學期第二次段考",
+            "number": "1312",
+            "thisterm": "1",
+            "thisyear": "113",
+            "url": "student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1312&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%A4G%A6%B8%ACq%A6%D2"
+        },
+        {
+            "full_url": "https://eschool.ykvs.ntpc.edu.tw/Online/selection_student/student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1313&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%B4%C1%A5%BD%A6%D2",
+            "name": "[113上] 113上學期第期末考",
+            "number": "1313",
+            "thisterm": "1",
+            "thisyear": "113",
+            "url": "student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1313&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%B4%C1%A5%BD%A6%D2"
+        }
+    ]
+}
+```
+
+### 9. 考試成績
+
+**GET** `/api/exam-scores`
+
+取得指定考試的詳細成績資料。
 
 #### 請求標頭
 ```
@@ -417,64 +454,49 @@ token: {user_token}
 ```
 
 #### 查詢參數
-- `name` (string, optional): 考試名稱
+- `name` (string, required): 考試名稱
 
 #### 範例請求
 ```
-GET /api/all_score?name=[113上] 113上學期第期末考
+GET /api/exam-scores?name=[113上] 113上學期第期末考
 ```
 
 #### 成功回應 (200)
 ```json
 {
+    "status": "success",
     "data": {
-        "menu": [
+        "exam_info": "【訊二孝】[113上] 113上學期第期末考成績",
+        "student_info": {
+            "class": "訊二孝",
+            "name": "洪碩亨班級：訊二孝",
+            "student_id": "215215"
+        },
+        "subjects": [
             {
-                "full_url": "https://eschool.ykvs.ntpc.edu.tw/Online/selection_student/student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1312&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%A4G%A6%B8%ACq%A6%D2",
-                "name": "[113上] 113上學期第二次段考",
-                "number": "1312",
-                "thisterm": "1",
-                "thisyear": "113",
-                "url": "student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1312&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%A4G%A6%B8%ACq%A6%D2"
+                "class_average": "63.61",
+                "personal_score": "61",
+                "subject": "公民與社會"
             },
             {
-                "full_url": "https://eschool.ykvs.ntpc.edu.tw/Online/selection_student/student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1313&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%B4%C1%A5%BD%A6%D2",
-                "name": "[113上] 113上學期第期末考",
-                "number": "1313",
-                "thisterm": "1",
-                "thisyear": "113",
-                "url": "student_subjects_number.asp?action=%A6U%A6%A1%A6%A8%C1Z&thisyear=113&thisterm=1&number=1313&exam%5Fname=113%A4W%BE%C7%B4%C1%B2%C4%B4%C1%A5%BD%A6%D2"
+                "class_average": "49.79",
+                "personal_score": "42",
+                "subject": "數位邏輯設計"
             }
         ],
-        "scores": {
-            "exam_info": "【訊二孝】[113上] 113上學期第期末考成績",
-            "student_info": {
-                "class": "訊二孝",
-                "name": "洪碩亨班級：訊二孝",
-                "student_id": "215215"
-            },
-            "subjects": [
-                {
-                    "class_average": "63.61",
-                    "personal_score": "61",
-                    "subject": "公民與社會"
-                },
-                {
-                    "class_average": "49.79",
-                    "personal_score": "42",
-                    "subject": "數位邏輯設計"
-                }
-            ],
-            "summary": {
-                "average_score": "31.05",
-                "class_rank": "25",
-                "department_rank": "87",
-                "total_score": "621"
-            }
+        "summary": {
+            "average_score": "31.05",
+            "class_rank": "25",
+            "department_rank": "87",
+            "total_score": "621"
         }
-    },
-    "status": "success"
+    }
 }
+```
+
+#### 錯誤回應
+- **400 Bad Request**: 未提供考試名稱
+- **404 Not Found**: 找不到指定的考試
 ```
 
 ## 錯誤碼說明

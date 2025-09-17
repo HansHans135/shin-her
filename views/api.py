@@ -98,6 +98,7 @@ async def index():
     
     if "重新登入" in result['html']:
         return redirect("/logout")
+    
     return render_template('api.html',api_key = request.values.get('key'))
 
 @home.route('/generate')
@@ -106,6 +107,9 @@ async def generate():
     if not account or not load_cookies_from_file(account):
         return redirect("/login")
 
+
+    if config['app']['api'] == False:
+        return redirect("/api?key=功能未開啟")
     url = f"{config['school']['base_url']}selection_student/moralculture_%20bonuspenalty.asp"
     
     result = get_page_with_session(url, account)
@@ -290,12 +294,11 @@ async def score():
     all_data = extractor.get_all_grade_data()
     return jsonify({"status": "success", "data": all_data})
 
-@home.route('/all_score')
-async def all_score():
+@home.route('/exams')
+async def exams():
     """
-    取得考試成績 API
-    返回考試選單與指定考試的詳細成績資料
-    支援考試名稱參數篩選特定考試
+    取得考試選單 API
+    返回所有可用的考試選單資料
     """
     api_account = load_api_key(request)
     if not api_account:
@@ -317,23 +320,54 @@ async def all_score():
         return jsonify({"status": "error", "message": "登入已過期"}), 401
         
     menu = parse_exam_menu(result['html'])
+    return jsonify({"status": "success", "data": menu})
+
+@home.route('/exam-scores')
+async def exam_scores():
+    """
+    取得考試成績 API
+    返回指定考試的詳細成績資料
+    必須提供考試名稱參數
+    """
+    api_account = load_api_key(request)
+    if not api_account:
+        return jsonify({"status": "error", "message": "未授權"}), 401
+    
+    account = load_api_token(request)
+    if not account:
+        return jsonify({"status": "error", "message": "未提供帳號"}), 401
+    if not account or not load_cookies_from_file(account):
+        return jsonify({"status": "error", "message": "未登入"}), 401
     
     name = request.values.get("name")
-    url = menu[0]['full_url']
-    for i in menu:
-        if i["name"] == name:
-            url = i['full_url']
-            break
-            
+    if not name:
+        return jsonify({"status": "error", "message": "未提供考試名稱"}), 400
+    
+    # 先取得考試選單
+    url = f"{config['school']['base_url']}selection_student/student_subjects_number.asp?action=open_window_frame"
     result = get_page_with_session(url, account)
+    if not result:
+        return jsonify({"status": "error", "message": "無法取得選單資料"}), 500
+    
+    if "重新登入" in result['html']:
+        return jsonify({"status": "error", "message": "登入已過期"}), 401
+        
+    menu = parse_exam_menu(result['html'])
+    
+    # 找出對應的考試URL
+    exam_url = None
+    for exam in menu:
+        if exam["name"] == name:
+            exam_url = exam['full_url']
+            break
+    
+    if not exam_url:
+        return jsonify({"status": "error", "message": "找不到指定的考試"}), 404
+            
+    result = get_page_with_session(exam_url, account)
     if not result:
         return jsonify({"status": "error", "message": "無法取得考試資料"}), 500
         
     data = parse_exam_scores(result['html'])
-    return jsonify({
-        "status": "success", 
-        "data": {
-            "menu": menu,
-            "scores": data
-        }
-    })
+    return jsonify({"status": "success", "data": data})
+
