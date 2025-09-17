@@ -7,11 +7,11 @@ def load_config():
     with open('config.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     if not data['app']['secret_key']:
-        data['app']['secret_key'] = Fernet.generate_key().decode
+        data['app']['secret_key'] = Fernet.generate_key().decode()
         with open('config.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
             print("已生成新的 API secret_key 並保存到 config.json")
-
+    os.makedirs('data/cookie', exist_ok=True)
     if not os.path.isfile('data/api/key.json'):
         os.makedirs('data/api', exist_ok=True)
         with open('data/api/key.json', 'w+', encoding='utf-8') as f:

@@ -112,7 +112,7 @@ def save_updated_cookies(driver, filename):
         print(f"保存更新後的 cookies 時發生錯誤: {e}")
         return None
 
-def fetch_page_data(url, cookies_file, save_html=True):
+def fetch_page_data(url, cookies_file, save_html=True, visit_root=False):
     driver = setup_driver()
     
     try:
@@ -124,13 +124,25 @@ def fetch_page_data(url, cookies_file, save_html=True):
             print("無法載入 cookies，請先執行登入程式")
             return None
         
-        base_url = config['school']['root_url']
-        print(f"正在訪問root: {base_url}")
-        driver.get(base_url)
-
-        if not add_cookies_to_driver(driver, cookies):
-            print("無法設置 cookies")
-            return None
+        if visit_root:
+            base_url = config['school']['root_url']
+            print(f"正在訪問root: {base_url}")
+            driver.get(base_url)
+            
+            if not add_cookies_to_driver(driver, cookies):
+                print("無法設置 cookies")
+                return None
+        else:
+            print("跳過訪問 root，直接前往目標頁面")
+            # 先訪問目標域名以設置 cookies
+            from urllib.parse import urlparse
+            parsed_url = urlparse(url)
+            domain_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+            driver.get(domain_url)
+            
+            if not add_cookies_to_driver(driver, cookies):
+                print("無法設置 cookies")
+                return None
         
         print(f"正在訪問目標頁面: {url}")
         driver.get(url)
@@ -206,7 +218,7 @@ def fetch_page_data(url, cookies_file, save_html=True):
         driver.quit()
         print("瀏覽器已關閉")
 
-def get_page_data(url, cookies_file, save_html=True):
+def get_page_data(url, cookies_file, save_html=True, visit_root=False):
     """
     獲取頁面資料的主要函數 - 透過參數傳入
     
@@ -214,6 +226,7 @@ def get_page_data(url, cookies_file, save_html=True):
         url (str): 要訪問的網址
         cookies_file (str): 要使用的 cookies JSON 檔案路徑
         save_html (bool): 是否保存 HTML 檔案
+        visit_root (bool): 是否先訪問 root URL
     
     Returns:
         dict: 包含頁面資料的字典，失敗時返回 None
@@ -225,7 +238,7 @@ def get_page_data(url, cookies_file, save_html=True):
     print(f"目標 URL: {url}")
     print(f"Cookies 檔案: {cookies_file}")
     
-    result = fetch_page_data(url, cookies_file, save_html)
+    result = fetch_page_data(url, cookies_file, save_html, visit_root)
     
     if result:
         print(f"\n成功獲取頁面資料!")
