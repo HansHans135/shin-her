@@ -3,16 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API</title>
+    <title>API 金鑰管理</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
 </head>
-<body>
-    {% if api_key %}
-    <p>你的 API 金鑰是：{{ api_key }}</p>
-    {% else %}
-    <p>你尚未創建</p>
-    {% endif %}
-    <button><a href="/api/generate">重新產生 API 金鑰</a></button>
+<body class="bg-amber-50 text-amber-900 min-h-screen">
+    <div class="flex">
+        <!-- 側邊欄 -->
+        <div class="hidden lg:flex lg:w-64 bg-amber-100 min-h-screen flex-col border-r border-amber-200">
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="/" class="flex items-center px-4 py-3 text-amber-700 hover:bg-amber-200 hover:text-amber-900 rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">🏆</span>首頁
+                </a>
+                <a href="/api" class="flex items-center px-4 py-3 bg-amber-600 text-white rounded-lg">
+                    <span class="text-2xl mr-3">🔑</span>API 金鑰
+                </a>
+                <a href="/logout" class="flex items-center px-4 py-3 text-amber-700 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+                    <span class="text-2xl mr-3">⏏️</span>登出
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主要內容 -->
+        <div class="flex-1 p-6 lg:p-8 pb-20 lg:pb-8">
+            <h1 class="text-4xl lg:text-6xl font-bold mb-8 text-amber-800">API 金鑰管理</h1>
+            
+            <div class="max-w-4xl">
+                <!-- API 金鑰顯示卡片 -->
+                <div class="bg-white border border-amber-200 rounded-2xl p-8 mb-6 shadow-sm">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-amber-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl">🔑</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-2xl font-semibold text-amber-800 mb-4">你的 API 金鑰</h2>
+                            {% if api_key %}
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                                <p class="text-sm text-amber-600 mb-2">API 金鑰：</p>
+                                <div class="bg-white border border-amber-300 rounded-lg p-3 font-mono text-amber-800 break-all">
+                                    {{ api_key }}
+                                </div>
+                            </div>
+                            <p class="text-sm text-amber-600 mb-4">請妥善保存此金鑰，離開此頁面後將無法再次查看完整金鑰。</p>
+                            {% else %}
+                            <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+                                <p class="text-red-700">無法重新查看現有的 API 金鑰，請重新產生新的金鑰。</p>
+                            </div>
+                            {% endif %}
+                            
+                            <a href="/api/generate" class="inline-flex items-center px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors font-medium">
+                                <span class="mr-2">🔄</span>重新產生 API 金鑰
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API 使用說明卡片 -->
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-8 shadow-sm">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl">📚</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-semibold text-blue-800 mb-4">API 使用說明</h3>
+                            <div class="space-y-4 text-blue-700">
+                                <div>
+                                    <h4 class="font-medium mb-2">詳細文件：</h4>
+                                    <p class="mb-3">請參考完整的 API 文件了解使用方法和範例。</p>
+                                    <a href="https://github.com/HansHans135/shin-her/blob/main/API_DOCS.md" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                        <span class="mr-2">📖</span>查看 API 文件
+                                    </a>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2">注意事項：</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-sm">
+                                        <li>請勿將 API 金鑰分享給他人</li>
+                                        <li>建議定期更換 API 金鑰</li>
+                                        <li>如發現金鑰洩露，請立即重新產生</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
