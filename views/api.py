@@ -72,7 +72,52 @@ def set_apikey_time(account):
         data[account]['time'] = int(time.time())
     with open('data/api/key.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+
+def generate_apikey(account):
+    with open('data/api/key.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    data[account] = {
+        'key':Fernet.generate_key().decode(),
+        'time':int(time.time())
+    }
+    with open('data/api/key.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    return data[account]['key']
+
+@home.route('/')
+async def index():
+    account = session.get("account")
+    if not account or not load_cookies_from_file(account):
+        return redirect("/login")
+
+    url = f"{config['school']['base_url']}selection_student/moralculture_%20bonuspenalty.asp"
+
+    result = get_page_with_session(url, account)
+    if not result:
+        return redirect("/logout")
     
+    if "重新登入" in result['html']:
+        return redirect("/logout")
+    return render_template('api.html',api_key = request.values.get('key'))
+
+@home.route('/generate')
+async def generate():
+    account = session.get("account")
+    if not account or not load_cookies_from_file(account):
+        return redirect("/login")
+
+    url = f"{config['school']['base_url']}selection_student/moralculture_%20bonuspenalty.asp"
+    
+    result = get_page_with_session(url, account)
+    if not result:
+        return redirect("/logout")
+    
+    if "重新登入" in result['html']:
+        return redirect("/logout")
+
+    api_key = generate_apikey(account)
+    return redirect(f'/api?key={api_key}')
+
 @home.route('/login', methods=['POST'])
 def login():
     """
@@ -98,8 +143,8 @@ def login():
     return jsonify(data)
 
 
-@home.route('/')
-async def index():
+@home.route('/rap')
+async def rap():
     """
     取得獎懲記錄 API
     返回學生的功過記錄資料

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://view.hans0805.me/script.js" data-website-id="7af6711d-f47a-451c-a37e-343a3473e5aa"></script>
+</head>
+<body>
+    {% if api_key %}
+    <p>你的 API 金鑰是：{{ api_key }}</p>
+    {% else %}
+    <p>你尚未創建</p>
+    {% endif %}
+    <button><a href="/api/generate">重新產生 API 金鑰</a></button>
+</body>
+</html>

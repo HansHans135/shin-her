@@ -58,7 +58,7 @@ Content-Type: application/json
 
 ### 2. 獎懲記錄
 
-**GET** `/api/`
+**GET** `/api/rap`
 
 取得學生的功過記錄資料。
 
