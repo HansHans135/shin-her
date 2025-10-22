@@ -1,5 +1,8 @@
 # 更好的欣河系統
 透過爬蟲改善原始系統難用到靠北的問題
+
+[![Athena Award Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Faward.athena.hackclub.com%2Fapi%2Fbadge)](https://award.athena.hackclub.com?utm_source=readme)
+
 - demo(僅限鶯歌工商學生使用)
 > https://ykvs.hans0805.me/
 
