@@ -1,45 +1,15 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-import time
+import requests
 import json
 import os
 from datetime import datetime
+from urllib.parse import urlparse
 
 def load_config():
+    """載入設定檔"""
     with open('config.json', 'r', encoding='utf-8') as f:
         return json.load(f)
 
 config = load_config()
-
-def setup_driver():
-    """設定 Chrome WebDriver"""
-    chrome_options = Options()
-    
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--no-first-run")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
-    
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    
-    stealth_js = """
-    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-    Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
-    Object.defineProperty(navigator, 'languages', {get: () => ['zh-TW', 'zh', 'en']});
-    window.chrome = {runtime: {}};
-    Object.defineProperty(navigator, 'permissions', {get: () => ({query: () => Promise.resolve({state: 'granted'})})});
-    """
-    driver.execute_script(stealth_js)
-    
-    return driver
 
 def load_cookies_from_file(filename="login_cookies.json"):
     """從 JSON 檔案載入 cookies"""
@@ -56,53 +26,10 @@ def load_cookies_from_file(filename="login_cookies.json"):
         print(f"載入 cookies 時發生錯誤: {e}")
         return None
 
-def add_cookies_to_driver(driver, cookies):
-    """將 cookies 添加到 WebDriver"""
+def save_updated_cookies(session, filename):
+    """保存更新後的 cookies"""
     try:
-        if isinstance(cookies, dict):
-            cookie_list = []
-            for name, value in cookies.items():
-                cookie_dict = {
-                    'name': name,
-                    'value': str(value),
-                    'domain': '.ykvs.ntpc.edu.tw',
-                    'path': '/'
-                }
-                cookie_list.append(cookie_dict)
-            cookies = cookie_list
-        elif isinstance(cookies, list):
-            pass
-        else:
-            print(f"不支援的 cookies 格式: {type(cookies)}")
-            return False
-        
-        for cookie in cookies:
-            clean_cookie = {
-                'name': cookie['name'],
-                'value': cookie['value'],
-                'domain': cookie.get('domain', '.ykvs.ntpc.edu.tw'),
-                'path': cookie.get('path', '/')
-            }
-            
-            if 'secure' in cookie:
-                clean_cookie['secure'] = cookie['secure']
-            if 'httpOnly' in cookie:
-                clean_cookie['httpOnly'] = cookie['httpOnly']
-            if 'expiry' in cookie:
-                clean_cookie['expiry'] = int(cookie['expiry'])
-                
-            driver.add_cookie(clean_cookie)
-        
-        print(f"已添加 {len(cookies)} 個 cookies 到瀏覽器")
-        return True
-    except Exception as e:
-        print(f"添加 cookies 時發生錯誤: {e}")
-        return False
-
-def save_updated_cookies(driver, filename):
-    try:
-        cookies = driver.get_cookies()
-        cookie_dict = {cookie['name']: cookie['value'] for cookie in cookies}
+        cookie_dict = {cookie.name: cookie.value for cookie in session.cookies}
         
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(cookie_dict, f, indent=2, ensure_ascii=False)
@@ -113,114 +40,107 @@ def save_updated_cookies(driver, filename):
         return None
 
 def fetch_page_data(url, cookies_file, save_html=True, visit_root=False):
-    driver = setup_driver()
+    """使用 requests 獲取頁面資料"""
     
     try:
-        print(f"=== 開始獲取頁面資料 ===")
+        print(f"=== 開始獲取頁面資料 (Requests版本) ===")
         print(f"目標 URL: {url}")
         
+        # 載入 cookies
         cookies = load_cookies_from_file(cookies_file)
         if not cookies:
             print("無法載入 cookies，請先執行登入程式")
             return None
         
+        # 建立 session
+        session = requests.Session()
+        
+        # 設定 headers
+        session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        })
+        
+        # 添加 cookies 到 session
+        for name, value in cookies.items():
+            session.cookies.set(name, value)
+        
+        # 如果需要先訪問 root
         if visit_root:
             base_url = config['school']['root_url']
-            print(f"正在訪問root: {base_url}")
-            driver.get(base_url)
-            
-            if not add_cookies_to_driver(driver, cookies):
-                print("無法設置 cookies")
-                return None
+            print(f"正在訪問 root: {base_url}")
+            root_response = session.get(base_url, allow_redirects=True, timeout=30)
+            print(f"Root 訪問狀態碼: {root_response.status_code}")
         else:
             print("跳過訪問 root，直接前往目標頁面")
-            # 先訪問目標域名以設置 cookies
-            from urllib.parse import urlparse
-            parsed_url = urlparse(url)
-            domain_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-            driver.get(domain_url)
-            
-            if not add_cookies_to_driver(driver, cookies):
-                print("無法設置 cookies")
-                return None
         
+        # 訪問目標頁面
         print(f"正在訪問目標頁面: {url}")
-        driver.get(url)
+        response = session.get(url, allow_redirects=True, timeout=30)
         
-        WebDriverWait(driver, 10).until(
-            lambda driver: driver.execute_script("return document.readyState") == "complete"
-        )
-        
-        current_url = driver.current_url
-        page_title = driver.title
-        page_source = driver.page_source
-        
+        # 檢查回應
         print(f"\n=== 頁面資訊 ===")
-        print(f"當前 URL: {current_url}")
-        print(f"頁面標題: {page_title}")
-        print(f"頁面大小: {len(page_source)} 字元")
+        print(f"狀態碼: {response.status_code}")
+        print(f"最終 URL: {response.url}")
+        print(f"編碼: {response.encoding}")
+        print(f"頁面大小: {len(response.text)} 字元")
         
-        if "auth/online" in current_url or "登入" in page_title:
+        # 檢查是否被重定向到登入頁面
+        if "auth/online" in response.url or response.status_code == 401:
             print("可能需要重新登入，頁面被重定向到登入頁面")
         else:
             print("成功訪問頁面")
         
+        # 保存 HTML
         if save_html:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"page_data_{timestamp}.html"
+            filename = f"page_data_requests_{timestamp}.html"
             with open(filename, "w", encoding="utf-8") as f:
-                f.write(page_source)
-            print(f"{filename}")
+                f.write(response.text)
+            print(f"已保存 HTML 到: {filename}")
         
-        try:
-            print(f"\n=== 頁面內容分析 ===")
-            
-            tables = driver.find_elements(By.TAG_NAME, "table")
-            if tables:
-                print(f"找到 {len(tables)} 個表格")
-                for i, table in enumerate(tables, 1):
-                    rows = table.find_elements(By.TAG_NAME, "tr")
-                    print(f"表格 {i}: {len(rows)} 行")
-            
-            forms = driver.find_elements(By.TAG_NAME, "form")
-            if forms:
-                print(f"找到 {len(forms)} 個表單")
-            
-            important_elements = []
-            for selector in ["input", "select", "textarea", "button"]:
-                elements = driver.find_elements(By.TAG_NAME, selector)
-                if elements:
-                    important_elements.append(f"{selector}: {len(elements)} 個")
-            
-            if important_elements:
-                print(f"頁面元素: {', '.join(important_elements)}")
-                
-        except Exception as e:
-            print(f"分析頁面內容時發生錯誤: {e}")
+        # 簡單的內容分析
+        print(f"\n=== 頁面內容分析 ===")
+        content = response.text.lower()
+        print(f"包含 'table' 標籤: {'是' if '<table' in content else '否'}")
+        print(f"包含 'form' 標籤: {'是' if '<form' in content else '否'}")
+        print(f"包含 'input' 標籤: {'是' if '<input' in content else '否'}")
         
-        updated_cookies = save_updated_cookies(driver, cookies_file)
+        # 保存更新的 cookies
+        updated_cookies = save_updated_cookies(session, cookies_file)
         
+        # 整理回傳資料
         page_data = {
-            'url': current_url,
-            'title': page_title,
-            'html': page_source,
+            'url': response.url,
+            'status_code': response.status_code,
+            'headers': dict(response.headers),
+            'html': response.text,
             'cookies': updated_cookies,
             'timestamp': datetime.now().isoformat()
         }
         
         return page_data
         
-    except Exception as e:
+    except requests.exceptions.Timeout:
+        print(f"請求超時")
+        return None
+    except requests.exceptions.ConnectionError:
+        print(f"連線錯誤")
+        return None
+    except requests.exceptions.RequestException as e:
         print(f"獲取頁面資料時發生錯誤: {e}")
         return None
-    
-    finally:
-        driver.quit()
-        print("瀏覽器已關閉")
+    except Exception as e:
+        print(f"未預期的錯誤: {e}")
+        return None
 
 def get_page_data(url, cookies_file, save_html=True, visit_root=False):
     """
-    獲取頁面資料的主要函數 - 透過參數傳入
+    獲取頁面資料的主要函數 (Requests 版本)
     
     Args:
         url (str): 要訪問的網址
@@ -243,8 +163,8 @@ def get_page_data(url, cookies_file, save_html=True, visit_root=False):
     if result:
         print(f"\n成功獲取頁面資料!")
         print(f"頁面統計:")
+        print(f"   - 狀態碼: {result['status_code']}")
         print(f"   - URL: {result['url']}")
-        print(f"   - 標題: {result['title']}")
         print(f"   - HTML 大小: {len(result['html'])} 字元")
         print(f"   - Cookies 數量: {len(result['cookies']) if result['cookies'] else 0}")
         print(f"   - 獲取時間: {result['timestamp']}")
@@ -252,3 +172,21 @@ def get_page_data(url, cookies_file, save_html=True, visit_root=False):
         print(f"獲取頁面資料失敗")
     
     return result
+
+# 使用範例
+if __name__ == "__main__":
+    # 範例用法
+    test_url = "https://ykvs.ntpc.edu.tw/p/412-1000-1491.php"
+    cookies_file = "login_cookies.json"
+    
+    result = get_page_data(
+        url=test_url,
+        cookies_file=cookies_file,
+        save_html=True,
+        visit_root=False
+    )
+    
+    if result:
+        print("\n✓ 成功獲取頁面")
+    else:
+        print("\n✗ 獲取失敗")
