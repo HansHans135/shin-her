@@ -284,7 +284,7 @@ def calculate_subject_absences(curriculum_data, absence_data, semester):
     }
 
     for record in absence_data:
-        if record["學年"] != "下":
+        if record["學年"] != semester:
             continue
         weekday = record["星期"]
         period = record["節次"]
